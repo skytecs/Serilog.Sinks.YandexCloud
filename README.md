@@ -4,7 +4,7 @@ Serilog Sink for Yandex Cloud logging
 Setup via appsettings.json:
 ```
   "Serilog": {
-    "Using": [ "Serilog.SinksYandexCloud" ],
+    "Using": [ "Serilog.Sinks.YandexCloud" ],
     "WriteTo": [
       {
         "Name": "YandexCloud",
