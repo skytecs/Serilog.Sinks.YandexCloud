@@ -1,2 +1,2 @@
-# Serilog.Sink.YandexCloud
+# Serilog.Sinks.YandexCloud
 Serilog Sink for Yandex Cloud logging
