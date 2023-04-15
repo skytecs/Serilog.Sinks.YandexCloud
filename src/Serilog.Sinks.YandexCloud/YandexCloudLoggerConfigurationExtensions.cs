@@ -1,4 +1,5 @@
 ﻿using Serilog.Configuration;
+using Serilog.Debugging;
 using Serilog.Formatting;
 using Serilog.Sinks.PeriodicBatching;
 using Yandex.Cloud;
@@ -12,18 +13,15 @@ namespace Serilog.Sinks.YandexCloud
             string keyId,
             string serviceAccountId,
             string privateKey,
-            string folderId,
-            string logGroupId,
-            string resourceId,
-            string resourceType,
-            ITextFormatter formatter,
+            string? folderId = null,
+            string? logGroupId = null,
+            string? resourceId = null,
+            string? resourceType = null,
             int batchSizeLimit = 100,
             int period = 2,
             int queueLimit = 1000,
-            bool eagerlyEmitFirstEvent = true
-            )
+            bool eagerlyEmitFirstEvent = true)
         {
-
             var credentials = new IamJwtCredentialsConfiguration
             {
                 Id = keyId,
@@ -41,7 +39,9 @@ namespace Serilog.Sinks.YandexCloud
                 ResourceType = resourceType
             };
 
-            var sink = new YandexCloudSink(sdk, formatter, settings);
+            settings.Validate();
+
+            var sink = new YandexCloudSink(sdk.Services.Logging.LogIngestionService, settings);
 
             var batchingOptions = new PeriodicBatchingSinkOptions
             {
