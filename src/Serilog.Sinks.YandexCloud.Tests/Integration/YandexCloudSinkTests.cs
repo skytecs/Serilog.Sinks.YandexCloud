@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Core.Testing;
 using Moq;
+using Serilog.Context;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.PeriodicBatching;
@@ -34,7 +36,7 @@ public class YandexCloudSinkTests
         var logger = new LoggerConfiguration().WriteTo.Sink(new WrapperSink(sink))
             .CreateLogger();
 
-        logger.Write(LogEventLevel.Information, "test message {subst}","subst value");
+        logger.Write(LogEventLevel.Information, "test message");
 
         Assert.That(ingestionServiceMock.Invocations.Count, Is.EqualTo(1));
 
@@ -44,6 +46,89 @@ public class YandexCloudSinkTests
         Assert.That(writeRequest.Resource.Type, Is.EqualTo(settings.ResourceType));
         Assert.That(writeRequest.Destination.LogGroupId, Is.EqualTo(settings.LogGroupId));
         Assert.That(writeRequest.Entries.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void ScalarLogPropertiesShouldAppearInPayload()
+    {
+        var ingestionServiceMock = CreateIngestionServiceMock();
+
+        var settings = new YandexCloudSinkSettings
+        {
+            LogGroupId = Guid.NewGuid().ToString(),
+        };
+
+        var sink = new YandexCloudSink(ingestionServiceMock.Object, settings);
+
+        var logger = new LoggerConfiguration()
+            .Enrich.WithProperty("CustomScalarProperty","property value")
+            .WriteTo.Sink(new WrapperSink(sink))
+            .CreateLogger();
+
+        logger.Write(LogEventLevel.Information, "test message");
+
+        var writeRequest = ingestionServiceMock.Invocations.First().Arguments[0] as WriteRequest;
+
+        var customPropertyField = writeRequest.Entries[0].JsonPayload.Fields["CustomScalarProperty"].StringValue;
+
+        Assert.That(customPropertyField, Is.EqualTo("property value"));
+    }
+
+    [Test]
+    public void ListLogPropertiesShouldAppearInPayload()
+    {
+        var ingestionServiceMock = CreateIngestionServiceMock();
+
+        var settings = new YandexCloudSinkSettings
+        {
+            LogGroupId = Guid.NewGuid().ToString(),
+        };
+
+        var sink = new YandexCloudSink(ingestionServiceMock.Object, settings);
+
+        // TODO: Add support for scalar types other than strings
+        var logger = new LoggerConfiguration()
+            .Enrich.WithProperty("CustomListProperty", new object[] { "1", "string value", "true" })
+            .WriteTo.Sink(new WrapperSink(sink))
+            .CreateLogger();
+
+        logger.Write(LogEventLevel.Information, "test message");
+
+        var writeRequest = ingestionServiceMock.Invocations.First().Arguments[0] as WriteRequest;
+
+        var customPropertyField = writeRequest.Entries[0].JsonPayload.Fields["CustomListProperty"].ListValue;
+
+        Assert.That(customPropertyField.Values.Count, Is.EqualTo(3));
+        Assert.That(customPropertyField.Values.Contains(Value.ForString("1")));
+        Assert.That(customPropertyField.Values.Contains(Value.ForString("string value")));
+        Assert.That(customPropertyField.Values.Contains(Value.ForString("true")));
+    }
+
+    [Test]
+    public void MessageTemplateFieldsShouldAppearInPayload()
+    {
+        var ingestionServiceMock = CreateIngestionServiceMock();
+
+        var settings = new YandexCloudSinkSettings
+        {
+            LogGroupId = Guid.NewGuid().ToString(),
+        };
+
+        var sink = new YandexCloudSink(ingestionServiceMock.Object, settings);
+
+        // TODO: Add support for scalar types other than strings
+        var logger = new LoggerConfiguration()
+            .WriteTo.Sink(new WrapperSink(sink))
+            .CreateLogger();
+
+        logger.Write(LogEventLevel.Information, "Hello, {CustomText:l}!", "World");
+
+        var writeRequest = ingestionServiceMock.Invocations.First().Arguments[0] as WriteRequest;
+        Assert.That(writeRequest.Entries.First().Message, Is.EqualTo("Hello, World!"));
+
+        var customPropertyField = writeRequest.Entries[0].JsonPayload.Fields["CustomText"].StringValue;
+
+        Assert.That(customPropertyField, Is.EqualTo("World"));
     }
 
     private static Mock<LogIngestionServiceClient> CreateIngestionServiceMock()

@@ -43,11 +43,6 @@ namespace Serilog.Sinks.YandexCloud
             var request = new WriteRequest
             {
                 Destination = new Destination(),
-                Resource = new LogEntryResource
-                {
-                    Id = _settings.ResourceId,
-                    Type = _settings.ResourceType
-                },
             };
 
             if (!string.IsNullOrEmpty(_settings.FolderId))
