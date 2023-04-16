@@ -7,7 +7,7 @@ ARG version
 WORKDIR /src
 COPY ["src/Serilog.Sinks.YandexCloud/Serilog.Sinks.YandexCloud.csproj", "Serilog.Sinks.YandexCloud/"]
 RUN dotnet restore "Serilog.Sinks.YandexCloud/Serilog.Sinks.YandexCloud.csproj"
-COPY . .
+COPY "src/" .
 WORKDIR "/src/Serilog.Sinks.YandexCloud"
 RUN dotnet build "Serilog.Sinks.YandexCloud.csproj" -c Release -p:PackageVersion=$version -o /build
 
