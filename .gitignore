@@ -1,8 +1,4 @@
-﻿################################################################################
-# Данный GITIGNORE-файл был автоматически создан Microsoft(R) Visual Studio.
-################################################################################
-
-/.vs
-/src/.vs
-/src/Serilog.Sinks.YandexCloud/bin
-/src/Serilog.Sinks.YandexCloud/obj
+﻿.vs/
+bin/
+obj/
+*.user

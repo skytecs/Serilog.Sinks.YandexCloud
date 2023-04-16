@@ -11,4 +11,10 @@
 		<PackageReference Include="Yandex.Cloud.SDK" Version="1.2.0" />
 		<PackageReference Include="YandexCloud.IamJwtCredentials" Version="1.0.1" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>Serilog.Sinks.YandexCloud.Tests</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
 </Project>
