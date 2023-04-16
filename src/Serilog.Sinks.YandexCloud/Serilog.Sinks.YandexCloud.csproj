@@ -5,6 +5,12 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/skytecs/Serilog.Sinks.YandexCloud</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/skytecs/Serilog.Sinks.YandexCloud</PackageProjectUrl>
+		<Title>Serilog Sink for Yandex Cloud Logging</Title>
+		<Description>Write Serilog events to the Yandex Cloud Logging service.</Description>
 	</PropertyGroup>
 
 	<ItemGroup>
