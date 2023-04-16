@@ -5,7 +5,12 @@ VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.YandexCloud", "src\Serilog.Sinks.YandexCloud\Serilog.Sinks.YandexCloud.csproj", "{AA1F9D69-D9C0-4630-9B65-907412C9D22E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.YandexCloud.Tests", "src\Serilog.Sinks.YandexCloud.Tests\Serilog.Sinks.YandexCloud.Tests.csproj", "{89F437FF-23C7-4CFD-B0BE-0563FCED2ACE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.YandexCloud.Tests", "src\Serilog.Sinks.YandexCloud.Tests\Serilog.Sinks.YandexCloud.Tests.csproj", "{89F437FF-23C7-4CFD-B0BE-0563FCED2ACE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".build", ".build", "{86A391F3-785F-4001-BA9C-FCACE0275CD4}"
+	ProjectSection(SolutionItems) = preProject
+		.build\Dockerfile = .build\Dockerfile
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
