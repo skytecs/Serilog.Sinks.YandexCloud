@@ -34,7 +34,7 @@ namespace Serilog.Sinks.YandexCloud
             }
             catch (Exception ex)
             {
-                SelfLog.WriteLine($"[{nameof(YandexCloudSink)}] error while sending log events\n{ex}");
+                SelfLog.WriteLine("[YandexCloudSink] Error while sending log events:\n{0}", ex);
             }
         }
 

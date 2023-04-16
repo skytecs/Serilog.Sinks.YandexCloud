@@ -9,6 +9,7 @@ using Grpc.Core.Testing;
 using Moq;
 using Serilog.Context;
 using Serilog.Core;
+using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Sinks.PeriodicBatching;
 using Yandex.Cloud.Billing.V1;
@@ -46,6 +47,32 @@ public class YandexCloudSinkTests
         Assert.That(writeRequest.Resource.Type, Is.EqualTo(settings.ResourceType));
         Assert.That(writeRequest.Destination.LogGroupId, Is.EqualTo(settings.LogGroupId));
         Assert.That(writeRequest.Entries.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void ShouldWriteToSelfLogOnError()
+    {
+        var exceptionMessage = "Custom Exception with {FalseField}";
+        var stringWriter = new StringWriter();
+        SelfLog.Enable(stringWriter);
+
+        var ingestionServiceMock = CreateIngestionServiceMockFromLambda(()=>throw new Exception(exceptionMessage));
+
+        var settings = new YandexCloudSinkSettings
+        {
+            LogGroupId = Guid.NewGuid().ToString(),
+        };
+
+        var sink = new YandexCloudSink(ingestionServiceMock.Object, settings);
+
+        var logger = new LoggerConfiguration().WriteTo.Sink(new WrapperSink(sink))
+            .CreateLogger();
+
+        logger.Write(LogEventLevel.Information, "test message");
+
+        Assert.That(stringWriter.ToString(), Does.Contain(exceptionMessage));
+
+        SelfLog.Disable();
     }
 
     [Test]
@@ -131,7 +158,7 @@ public class YandexCloudSinkTests
         Assert.That(customPropertyField, Is.EqualTo("World"));
     }
 
-    private static Mock<LogIngestionServiceClient> CreateIngestionServiceMock()
+    private static Mock<LogIngestionServiceClient> CreateIngestionServiceMockFromLambda(Func<WriteResponse> valueFactory)
     {
         var ingestionServiceMock = new Mock<LogIngestionServiceClient>();
 
@@ -144,7 +171,7 @@ public class YandexCloudSinkTests
             .Returns((WriteRequest r, Metadata m, DateTime? d, CancellationToken ct) =>
             {
                 return TestCalls.AsyncUnaryCall(
-                    Task.FromResult(new WriteResponse()),
+                    Task.FromResult(valueFactory()),
                     Task.FromResult(new Metadata()),
                     () => Status.DefaultSuccess,
                     () => new Metadata(),
@@ -153,6 +180,9 @@ public class YandexCloudSinkTests
 
         return ingestionServiceMock;
     }
+
+    private static Mock<LogIngestionServiceClient> CreateIngestionServiceMock() => 
+        CreateIngestionServiceMockFromLambda(() => new WriteResponse());
 
     class WrapperSink : ILogEventSink
     {
@@ -163,7 +193,7 @@ public class YandexCloudSinkTests
             _sink = sink;
         }
 
-        public void Emit(LogEvent logEvent) =>
+        public void Emit(LogEvent logEvent) => 
             _sink.EmitBatchAsync(new[] { logEvent }).Wait();
 
     }
