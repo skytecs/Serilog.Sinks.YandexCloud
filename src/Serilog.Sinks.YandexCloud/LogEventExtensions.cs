@@ -67,7 +67,6 @@ namespace Serilog.Sinks.YandexCloud
                 return null;
             }
 
-            // TODO: Add DictionaryValue support
             switch (property)
             {
                 case ScalarValue scalar:
@@ -89,6 +88,17 @@ namespace Serilog.Sinks.YandexCloud
                 case SequenceValue list:
                 {
                     return list.Elements.Select(x => ToStructure(x)).ToList();
+                }
+                case DictionaryValue dv:
+                {
+                    var dictionary = new Dictionary<string, dynamic>();
+
+                    foreach (var item in dv.Elements)
+                    {
+                        dictionary.Add(item.Key.Value?.ToString(), ToStructure(item.Value));
+                    }
+
+                    return dictionary;
                 }
                 default:
                 {
